@@ -1,0 +1,12 @@
+language: ruby
+rvm:
+ - "2.5.1"
+services:
+  - docker
+
+install:
+  - cd docker/
+  - docker build -t cobol_test .
+
+script:
+  - docker run cobol-test:latest | grep -q 'Hello world!'

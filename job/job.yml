@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cobol-docker-job
+  labels:
+    app: cobol-docker
+spec:
+  template:
+    spec:
+      containers:
+      - name: cobol-hello-world
+        image: us.icr.io/docker_cobol/hello_world:v1
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: docker-cobol-registry-secret

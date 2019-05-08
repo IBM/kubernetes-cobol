@@ -21,14 +21,6 @@ describe docker.images.where { repository == "#{REPOSITORY}" && tag == "#{TAG}" 
 end
 
 #
-# This test makes sure you have the demo build does what we expect.
-#
-describe docker_container(name: "#{IMAGE_NAME}") do
-  its('command') { should eq nil }
-  its('id') { should_not eq '' }
-end
-
-#
 # This test runs the container locally and verifies that the output is what we expect.
 #
 describe command("docker run #{IMAGE_NAME}") do

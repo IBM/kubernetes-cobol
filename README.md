@@ -118,15 +118,12 @@ Target:  local://
      ✔  should not exist
   #<Inspec::Resources::DockerImageFilter:0x0000000004c5ccf0> with repository == "us.icr.io/docker_cobol/hello_world" tag == "v1"
      ✔  should exist
-  Docker Container us.icr.io/docker_cobol/hello_world:v1
-     ✔  command should eq nil
-     ✔  id should not eq ""
   Command: `docker run us.icr.io/docker_cobol/hello_world:v1`
      ✔  stdout should eq "Hello world!\n"
      ✔  stderr should eq ""
      ✔  exit_status should eq 0
 
-Test Summary: 7 successful, 0 failures, 0 skipped
+Test Summary: 5 successful, 0 failures, 0 skipped
 $
 ```
 

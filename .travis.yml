@@ -9,4 +9,4 @@ install:
   - docker build -t cobol_test .
 
 script:
-  - docker run cobol-test:latest | grep -q 'Hello world!'
+  - docker run cobol_test:latest | grep -q 'Hello world!'

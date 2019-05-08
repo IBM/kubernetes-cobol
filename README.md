@@ -1,24 +1,24 @@
 
 [![Build Status](https://travis-ci.org/IBM/kubernetes-cobol.svg?branch=master)](https://travis-ci.org/IBM/kubernetes-cobol)
 
-# Running cobol on a Kubernetes cluster
+# Running COBOL on a Kubernetes cluster
 
-In this code pattern, we will build a docker container with a simple hello world cobol application using kubernetse and docker. We will build a docker container locally, test it, push it to a registry, then pull it down to a remote Kubernetes cluster expecting our output.
+In this code pattern, we will build a Docker container with a simple hello world COBOL application using Kubernetes and Docker. We will build a Docker container locally, test it, push it to a registry, then pull it down to a remote Kubernetes cluster expecting our output.
 
 When you have completed this code pattern, you will understand how to:
 
 * Build Docker containers locally
 * Test a basic Docker container
 * Push a Docker container to a remote registry
-* Configure Kubernetes to pull from a remote registry and run a Cobol Hello World Application
+* Configure Kubernetes to pull from a remote registry and run a COBOL Hello World Application
 
 # Steps
 
 1. [Install Docker Community Edition](#1-install-docker-community-edition).
 2. [Clone the Repository Locally](#2-clone-the-repository-locally).
-3. [Create your namespace.](#3-create-your-namespace).
-4. [Build your cobol container](#4-build-your-cobol-container).
-5. [Test your cobol container locally](#5-test-your-cobol-container-locally).
+3. [Create your namespace](#3-create-your-namespace).
+4. [Build your COBOL container](#4-build-your-cobol-container).
+5. [Test your COBOL container locally](#5-test-your-cobol-container-locally).
 6. [Create and connect to IBM Cloud Kubernetes cluster](#6-create-and-connect-to-ibm-cloud-kubernetes-cluster).
 7. [Run a job on Kubernetes](#7-run-a-job-on-kubernetes).
 
@@ -36,7 +36,7 @@ $ git clone https://github.com/IBM/kubernetes-cobol
 
 ### 3. Create your namespace
 
-Next build a `namespace` for your to work in. Log into IBM Cloud via the CLI, then run the following commands. We are going to call our container registry `namespace` "docker_cobol" as our example.
+Next create a `namespace` in IBM Cloud Container Registry to store your Docker images. Log into IBM Cloud via the CLI, then run the following commands. We are going to call our container registry `namespace` "docker_cobol" as our example.
 
 **NOTE**: `docker_cobol` is a universal namespace, you will need to change it so SOMETHING ELSE for you. I suggest maybe your first name and `docker_cobol` for instance `jj_docker_cobol` in my case.
 
@@ -46,7 +46,7 @@ $ ibmcloud cr namespace-add docker_cobol
 $ ibmcloud cr namespace-list | grep docker_cobol # a sanity check to make sure it was created correctly
 ```
 
-### 4. Build your cobol container
+### 4. Build your COBOL container
 
 Build the Docker container on your local workstation. This will require a few steps. We will walk you through each. First change the directory of `docker/`. You'll want build your container and tag it with a meaningful tag. Using the IBM Cloud registry, you can build the container and also push it to a registry in one command. We are going to use the `namespace` that we created above, and call the container `hello_world` and label it with `v1`.
 
@@ -84,7 +84,7 @@ v1: digest: sha256:9dac5ddf1210b899bf3fd75e263bc5a5854ade2141ec2abb6f3e6bf5c59b3
 $
 ```
 
-### 5. Test your cobol container locally
+### 5. Test your COBOL container locally
 
 After a successful build, lets test it out on our local machine. Go ahead and run the following command to pull from your local `namespace` and run it on your local workstation.
 
@@ -101,7 +101,7 @@ be35421f2508: Pull complete
 70ced04e9e75: Pull complete
 92cce9b2c928: Pull complete
 Digest: sha256:9dac5ddf1210b899bf3fd75e263bc5a5854ade2141ec2abb6f3e6bf5c59b3539
-Status: Downloaded newer image for us.icr.io/docker_cobol/hello_world
+Status: Downloaded newer image for us.icr.io/docker_cobol/hello_world:v1
 Hello world!
 ```
 
@@ -121,12 +121,16 @@ Target:  local://
   Docker Container us.icr.io/docker_cobol/hello_world:v1
      ✔  command should eq nil
      ✔  id should not eq ""
+  Command: `docker run us.icr.io/docker_cobol/hello_world:v1`
+     ✔  stdout should eq "Hello world!\n"
+     ✔  stderr should eq ""
+     ✔  exit_status should eq 0
 
-Test Summary: 4 successful, 0 failures, 0 skipped
+Test Summary: 7 successful, 0 failures, 0 skipped
 $
 ```
 
-There are a many tests you can write and very your docker containers here, I suggest taking a look at the official documentation [here](https://www.inspec.io/docs/reference/resources/docker/). We have a few tests in the `01-docker.rb` file I'd check it to see the a few options for some sanity checks.
+There are a many tests you can write and very your Docker containers here, I suggest taking a look at the official documentation [here](https://www.inspec.io/docs/reference/resources/docker/). We have a few tests in the `01-docker.rb` file I'd check it to see the a few options for some sanity checks.
 
 
 ### 6. Create and connect to IBM Cloud Kubernetes cluster

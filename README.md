@@ -192,11 +192,8 @@ Hello World!
 
 # Troubleshooting
 
-* TODO
+* Coming soon!
 
-  > TODO
-TODO
-TODO
 
 <!-- keep this -->
 ## License

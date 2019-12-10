@@ -1,4 +1,4 @@
-FROM centos:latest
+FROM centos:7
 
 ENV GMP_VERSION=6.0.0
 ENV GNU_COBOL=1.1

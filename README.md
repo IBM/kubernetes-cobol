@@ -16,15 +16,18 @@ When you have completed this code pattern, you will understand how to:
 
 1. [Install Docker Community Edition](#1-install-docker-community-edition).
 2. [Clone the Repository Locally](#2-clone-the-repository-locally).
-3. [Create your namespace](#3-create-your-namespace).
-4. [Build your COBOL container](#4-build-your-cobol-container).
-5. [Test your COBOL container locally](#5-test-your-cobol-container-locally).
-6. [Create and connect to IBM Cloud Kubernetes cluster](#6-create-and-connect-to-ibm-cloud-kubernetes-cluster).
-7. [Run a job on Kubernetes](#7-run-a-job-on-kubernetes).
+3. [Install IBM Cloud CLI](#3-install-ibm-cloud-cli).
+4. [Create your namespace](#4-create-your-namespace).
+5. [Build your COBOL container](#5-build-your-cobol-container).
+6. [Test your COBOL container locally](#6-test-your-cobol-container-locally).
+7. [Create and connect to IBM Cloud Kubernetes cluster](#7-create-and-connect-to-ibm-cloud-kubernetes-cluster).
+8. [Run a job on Kubernetes](#8-run-a-job-on-kubernetes).
 
 ### 1. Install Docker Community Edition
 
 First install the Docker-CE edition on your local workstation. There are two main editions of Docker, I’d like to take a moment to discuss the different versions here. First there is Docker Community Edition, or `docker-ce`, and Docker Enterprise Edition, or `docker-ee`. They both have advantages and are aimed at different use cases. I strongly suggest after walking through the documentation [here](https://docs.docker.com/install/overview/) to verify that Docker-CE is the correct one for your use case.
+
+Some of the further steps require that `docker` command do NOT use `sudo` preface, which is the default behavior after installation. To do so, log in as root user or follow the optional installations steps [here](https://docs.docker.com/engine/install/linux-postinstall/).
 
 ### 2. Clone the repository locally
 
@@ -34,7 +37,11 @@ Clone down this `git` repository on your local workstation.
 $ git clone https://github.com/IBM/kubernetes-cobol
 ```
 
-### 3. Create your namespace
+### 3. Install IBM Cloud CLI
+
+Before continue, make sure you have an active IBM Cloud account, as well as you have the IBM Cloud CLI already working in your shell. To learn more about IBM Cloud Container Registry and sign up for an IBM Cloud account, visit [website](https://www.ibm.com/cloud/container-registry). To install the IBM CLoud CLI, follow these [instructions](https://cloud.ibm.com/docs/cli?topic=cloud-cli-getting-started).
+
+### 4. Create your namespace
 
 Next create a `namespace` in IBM Cloud Container Registry to store your Docker images. Log into IBM Cloud via the CLI, then run the following commands. We are going to call our container registry `namespace` "docker_cobol" as our example.
 
@@ -46,7 +53,7 @@ $ ibmcloud cr namespace-add docker_cobol
 $ ibmcloud cr namespace-list | grep docker_cobol # a sanity check to make sure it was created correctly
 ```
 
-### 4. Build your COBOL container
+### 5. Build your COBOL container
 
 Build the Docker container on your local workstation. This will require a few steps. We will walk you through each. First change the directory of `docker/`. You'll want build your container and tag it with a meaningful tag. Using the IBM Cloud registry, you can build the container and also push it to a registry in one command. We are going to use the `namespace` that we created above, and call the container `hello_world` and label it with `v1`.
 
@@ -84,13 +91,13 @@ v1: digest: sha256:9dac5ddf1210b899bf3fd75e263bc5a5854ade2141ec2abb6f3e6bf5c59b3
 $
 ```
 
-### 5. Test your COBOL container locally
+### 6. Test your COBOL container locally
 
 After a successful build, lets test it out on our local machine. Go ahead and run the following command to pull from your local `namespace` and run it on your local workstation.
 
 ```bash
 $ ibmcloud cr login # incase you haven't already
-$ docker run us.icr.io/docker_cobol/hello_world
+$ docker run us.icr.io/docker_cobol/hello_world:v1   # remember to type in the correct namespace previously created
 Unable to find image 'us.icr.io/docker_cobol/hello_world' locally
 v1: Pulling from docker_cobol/hello_world
 8ba884070f61: Pull complete
@@ -105,10 +112,11 @@ Status: Downloaded newer image for us.icr.io/docker_cobol/hello_world:v1
 Hello world!
 ```
 
-Now that we have the container on our local workstation, lets run some tests against it. We'll be using some software called [InSpec](https://inspec.io). Go ahead and install the software from the official page. After that change directory into the `inspec/` directory.
+Now that we have the container on our local workstation, lets run some tests against it. We'll be using some software called [InSpec](https://inspec.io). Go ahead and install the software from the official page. After that, change directory into the `inspec/` directory and edit `01-docker.rb` file in order to replace "docker_cobol" by the correct `namespace` previously created.
 
 ```bash
 $ cd inspec/
+$ nano 01-docker.rb   # inside the file, replace "docker_cobol" example namespace by the namespace previously created
 $ inspec exec 01-docker.rb
 Profile: tests from 01-docker.rb (tests from 01-docker.rb)
 Version: (not specified)
@@ -130,53 +138,53 @@ $
 There are a many tests you can write and very your Docker containers here, I suggest taking a look at the official documentation [here](https://www.inspec.io/docs/reference/resources/docker/). We have a few tests in the `01-docker.rb` file I'd check it to see the a few options for some sanity checks.
 
 
-### 6. Create and connect to IBM Cloud Kubernetes cluster
+### 7. Create and connect to IBM Cloud Kubernetes cluster
 
 If we now have some successful building on the IBM Cloud, running the output to see `Hello World!` We need to request a IBM Cloud Kubernetes cluster. Run the following commands to request it. You can run a "free tier" cluster here for this code pattern. This will take a few minutes, and check the status by the second command.
 
 ```bash
-$ ibmcloud ks cluster-create --name cobol_docker
+$ ibmcloud ks cluster create classic --name cobol_docker
 $ ibmcloud ks clusters | grep cobol_docker
 ```
 
-When the cluster is complete and in `normal` state, we can connect to it. You can connect to in via the following commands, and run the second command as a sanity check, and yes, you will need to run the `export` command as a command.
+When the cluster is complete and in `normal` state, we can connect to it. You can connect to in via the following commands, and run the second command as a sanity check.
 
 ```bash
-$ ibmcloud ks cluster-config cobol_docker
+$ ibmcloud ks cluster config --cluster cobol_docker
 OK
 The configuration for cobol_docker was downloaded successfully.
 
-Export environment variables to start using Kubernetes.
-
-export KUBECONFIG=/home/jjasghar/.bluemix/plugins/container-service/clusters/cobol_docker/kube-config-dal13-cobol-docker.yml
-$ export KUBECONFIG=/home/jjasghar/.bluemix/plugins/container-service/clusters/cobol_docker/kube-config-dal13-cobol-docker.yml
+Added context for cobol_docker to the current kubeconfig file.
+You can now execute 'kubectl' commands against your cluster. For example, run 'kubectl get nodes'.
 $ kubectl get nodes
 NAME            STATUS    ROLES     AGE       VERSION
-10.186.59.93    Ready     <none>    1d      v1.12.3+IKS
+10.186.59.93    Ready     <none>    1d      v1.16.9+IKS
 ```
 
 Now that you have your cluster and your container build on the IBM Cloud Container Registry we should create some keys to allow for our Kubernetes cluster to call into the Registry and request our build.
 
 ```bash
-$ ibmcloud cr token-add --description "cobol kubernetes token" --non-expiring --readwrite
+$ ibmcloud iam service-id-create docker_cobol-service-id --description "COBOL Kubernetes service"
+$ ibmcloud iam service-policy-create docker_cobol-service-id --roles Manager --service-name container-registry
+$ ibmcloud iam service-api-key-create docker_cobol-api-key docker_cobol-service-id --description "API key for COBOL Kubernetes service"
 #
-# Take note of the TOKEN that is created and put it as <token_value> in the following command
+# Take note of the API Key created and put it as <API_Key> in the following command
 #
 $ kubectl create secret docker-registry docker-cobol-registry-secret \
-  --docker-server=us.icr.io/docker_cobol \
-  --docker-username=token \
-  --docker-password=<token_value> \
+  --docker-server=us.icr.io \
+  --docker-username=iamapikey \
+  --docker-password=<API_Key> \
   --docker-email=null
 ```
 
-### 7. Run a job on Kubernetes
+### 8. Run a job on Kubernetes
 
 Next change directory to the `job` directory, and open up the `job.yml`. You should see the `docker_cobol` and you need to edit it to your `namespace`. After this you will want to apply your batch job.
 
 ```bash
 $ cd job/
-$ nano job.yml
-$ kubectl -f job.yml
+$ nano job.yml   # remember to replace docker_cobol by the namespace previously created
+$ kubectl apply -f job.yml
 job.batch/cobol-docker-job created
 ```
 
@@ -192,7 +200,14 @@ Hello World!
 
 # Troubleshooting
 
-* Coming soon!
+### I had an error message saying that it is unable to find resource 'us.icr.io/docker_cobol/hello_world'
+
+Make sure you replace "docker_cobol" by your own `namespace` as discussed in the section [Create your namespace](#4-create-your-namespace).
+If the error persists, it may be related to version divergence (e.g.`Unable to find image 'us.icr.io/docker_cobol/hello_world:latest'`). In the last case, try to explicitly mention ":v1" after the resource name:
+
+```bash
+$ docker run us.icr.io/docker_cobol/hello_world:v1
+```
 
 
 <!-- keep this -->
